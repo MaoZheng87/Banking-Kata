@@ -1,10 +1,11 @@
 package banking;
 
+import banking.persistence.FileRepository;
 import banking.persistence.Repository;
 import com.google.gson.Gson;
 import spark.Service;
 
-import java.util.Optional;
+import java.io.File;
 import java.util.UUID;
 
 public class RestApi {
@@ -14,28 +15,14 @@ public class RestApi {
   private Repository<Account> accountRepository;
 
   public static void main(String[] strings) {
-    Account account = new Account(Money.of("12.34"));
-    System.out.println(account.getId());
-    
-    new RestApi(new Repository<Account>() {
-      
-      @Override
-      public Optional<Account> findOne(UUID id) {
-        return Optional.of(account);
-      }
-
-      @Override
-      public void save(Account item) {
-        
-      }
-    }).run(Service.ignite());
-
+    new RestApi(
+        new FileRepository<>(Account.class, new File("accounts.json")))
+    .run(Service.ignite());
   }
 
   public RestApi(Repository<Account> accountRepository) {
     this.accountRepository = accountRepository;
   }
-
 
   public void run(Service spark) {
     spark.port(PORT);
@@ -44,7 +31,7 @@ public class RestApi {
       Money startingBalance = new Gson().fromJson(request.body(), Money.class);
       Account account = new Account(startingBalance);
       accountRepository.save(account);
-      return null;
+      return account;
     }, new Gson()::toJson);
     
     spark.get("/accounts/:id/balance", (request, response) -> {

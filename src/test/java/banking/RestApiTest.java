@@ -8,6 +8,7 @@ import static org.hamcrest.core.Is.is;
 import banking.persistence.FakeRepository;
 import com.google.gson.Gson;
 import io.restassured.http.ContentType;
+import io.restassured.response.ValidatableResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -68,7 +69,7 @@ public class RestApiTest {
     Money startingBalance = Money.of("67.98");
     accountRepository.items.clear();
     
-    given()
+    ValidatableResponse responseValidator = given()
       .contentType(ContentType.JSON)
       .body(new Gson().toJson(startingBalance))
 
@@ -79,7 +80,10 @@ public class RestApiTest {
       .statusCode(200);
     
     assertThat(accountRepository.items).hasSize(1);
-    assertThat(accountRepository.items.get(0).getBalance()).isEqualTo(startingBalance);
+    Account savedAccount = accountRepository.items.get(0);
+    assertThat(savedAccount.getBalance()).isEqualTo(startingBalance);
+    
+    responseValidator.body("id", is(savedAccount.getId().toString()));
   }
 
 
