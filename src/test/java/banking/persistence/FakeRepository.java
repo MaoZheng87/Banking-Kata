@@ -16,4 +16,9 @@ public class FakeRepository<T extends Identifiable> implements Repository<T> {
     return items.stream().filter((T item) -> id.equals(item.getId())).findFirst();
   }
 
+  @Override
+  public void save(T item) {
+    items.add(item);
+  }
+
 }
