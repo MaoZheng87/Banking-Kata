@@ -1,9 +1,13 @@
 package banking;
 
-import java.math.BigDecimal;
+import banking.model.Identifiable;
 
-public class Account {
+import java.math.BigDecimal;
+import java.util.UUID;
+
+public class Account implements Identifiable {
   
+  private UUID id = UUID.randomUUID();
   private Money balance;
 
   public Account(Money startingBalance) {
@@ -14,12 +18,17 @@ public class Account {
     this(new Money(BigDecimal.ZERO));
   }
 
-  public void deposit(Money amount) {
-    balance = balance.plus(amount);
+  @Override
+  public UUID getId() {
+    return id;
   }
 
   public Money getBalance() {
     return balance;
+  }
+
+  public void deposit(Money amount) {
+    balance = balance.plus(amount);
   }
 
   public void withdraw(Money amount) {

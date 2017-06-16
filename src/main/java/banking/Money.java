@@ -25,14 +25,16 @@
  */
 package banking;
 
-import java.util.*;
-import java.io.Serializable;
+import static java.math.BigDecimal.ZERO;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.math.BigDecimal;
-import static java.math.BigDecimal.ZERO;
 import java.math.RoundingMode;
+import java.util.Collection;
+import java.util.Currency;
 
 /**
  * Represent an amount of money in any currency.
@@ -137,6 +139,8 @@ import java.math.RoundingMode;
  */
 public final class Money implements Comparable<Money>, Serializable {
 
+  private static RoundingMode ROUNDING_MODE = RoundingMode.HALF_EVEN;
+
   /**
    * Thrown when a set of <tt>Money</tt> objects do not have matching currencies.
    * 
@@ -172,7 +176,7 @@ public final class Money implements Comparable<Money>, Serializable {
    */
   public static void init(Currency aDefaultCurrency, RoundingMode aDefaultRounding) {
     DEFAULT_CURRENCY = aDefaultCurrency;
-    DEFAULT_ROUNDING = aDefaultRounding;
+    ROUNDING_MODE = aDefaultRounding;
   }
 
   static {
@@ -197,12 +201,10 @@ public final class Money implements Comparable<Money>, Serializable {
    *        to create a <tt>Money</tt> object in terms of 'thousands of dollars', for instance. Such an
    *        amount would have a scale of -3.
    * @param aCurrency is required.
-   * @param aRoundingStyle is required, must match a rounding style used by {@link BigDecimal}.
    */
-  public Money(BigDecimal aAmount, Currency aCurrency, RoundingMode aRoundingStyle) {
-    fAmount = aAmount;
-    fCurrency = aCurrency;
-    fRounding = aRoundingStyle;
+  public Money(BigDecimal aAmount, Currency aCurrency) {
+    amount = aAmount;
+    currency = aCurrency;
     validateState();
   }
 
@@ -215,35 +217,22 @@ public final class Money implements Comparable<Money>, Serializable {
    * @param aAmount is required, can be positive or negative.
    */
   public Money(BigDecimal aAmount) {
-    this(aAmount, DEFAULT_CURRENCY, DEFAULT_ROUNDING);
-  }
-
-  /**
-   * Constructor taking the money amount and currency.
-   * 
-   * <P>
-   * The rounding style takes a default value.
-   * 
-   * @param aAmount is required, can be positive or negative.
-   * @param aCurrency is required.
-   */
-  public Money(BigDecimal aAmount, Currency aCurrency) {
-    this(aAmount, aCurrency, DEFAULT_ROUNDING);
+    this(aAmount, DEFAULT_CURRENCY);
   }
 
   /** Return the amount passed to the constructor. */
   public BigDecimal getAmount() {
-    return fAmount;
+    return amount;
   }
 
   /** Return the currency passed to the constructor, or the default currency. */
   public Currency getCurrency() {
-    return fCurrency;
+    return currency;
   }
 
   /** Return the rounding style passed to the constructor, or the default rounding style. */
   public RoundingMode getRoundingStyle() {
-    return fRounding;
+    return ROUNDING_MODE;
   }
 
   /**
@@ -253,24 +242,24 @@ public final class Money implements Comparable<Money>, Serializable {
   public boolean isSameCurrencyAs(Money aThat) {
     boolean result = false;
     if (aThat != null) {
-      result = this.fCurrency.equals(aThat.fCurrency);
+      result = this.currency.equals(aThat.currency);
     }
     return result;
   }
 
   /** Return <tt>true</tt> only if the amount is positive. */
   public boolean isPlus() {
-    return fAmount.compareTo(ZERO) > 0;
+    return amount.compareTo(ZERO) > 0;
   }
 
   /** Return <tt>true</tt> only if the amount is negative. */
   public boolean isMinus() {
-    return fAmount.compareTo(ZERO) < 0;
+    return amount.compareTo(ZERO) < 0;
   }
 
   /** Return <tt>true</tt> only if the amount is zero. */
   public boolean isZero() {
-    return fAmount.compareTo(ZERO) == 0;
+    return amount.compareTo(ZERO) == 0;
   }
 
   /**
@@ -278,7 +267,7 @@ public final class Money implements Comparable<Money>, Serializable {
    */
   public Money plus(Money aThat) {
     checkCurrenciesMatch(aThat);
-    return new Money(fAmount.add(aThat.fAmount), fCurrency, fRounding);
+    return new Money(amount.add(aThat.amount), currency);
   }
 
   /**
@@ -286,7 +275,7 @@ public final class Money implements Comparable<Money>, Serializable {
    */
   public Money minus(Money aThat) {
     checkCurrenciesMatch(aThat);
-    return new Money(fAmount.subtract(aThat.fAmount), fCurrency, fRounding);
+    return new Money(amount.subtract(aThat.amount), currency);
   }
 
   /**
@@ -371,8 +360,8 @@ public final class Money implements Comparable<Money>, Serializable {
    */
   public Money times(int aFactor) {
     BigDecimal factor = new BigDecimal(aFactor);
-    BigDecimal newAmount = fAmount.multiply(factor);
-    return new Money(newAmount, fCurrency, fRounding);
+    BigDecimal newAmount = amount.multiply(factor);
+    return new Money(newAmount, currency);
   }
 
   /**
@@ -382,9 +371,9 @@ public final class Money implements Comparable<Money>, Serializable {
    * The scale of the returned <tt>Money</tt> is equal to the scale of 'this' <tt>Money</tt>.
    */
   public Money times(double aFactor) {
-    BigDecimal newAmount = fAmount.multiply(asBigDecimal(aFactor));
-    newAmount = newAmount.setScale(getNumDecimalsForCurrency(), fRounding);
-    return new Money(newAmount, fCurrency, fRounding);
+    BigDecimal newAmount = amount.multiply(asBigDecimal(aFactor));
+    newAmount = newAmount.setScale(getNumDecimalsForCurrency(), ROUNDING_MODE);
+    return new Money(newAmount, currency);
   }
 
   /**
@@ -395,8 +384,8 @@ public final class Money implements Comparable<Money>, Serializable {
    */
   public Money div(int aDivisor) {
     BigDecimal divisor = new BigDecimal(aDivisor);
-    BigDecimal newAmount = fAmount.divide(divisor, fRounding);
-    return new Money(newAmount, fCurrency, fRounding);
+    BigDecimal newAmount = amount.divide(divisor, ROUNDING_MODE);
+    return new Money(newAmount, currency);
   }
 
   /**
@@ -406,8 +395,8 @@ public final class Money implements Comparable<Money>, Serializable {
    * The scale of the returned <tt>Money</tt> is equal to the scale of 'this' <tt>Money</tt>.
    */
   public Money div(double aDivisor) {
-    BigDecimal newAmount = fAmount.divide(asBigDecimal(aDivisor), fRounding);
-    return new Money(newAmount, fCurrency, fRounding);
+    BigDecimal newAmount = amount.divide(asBigDecimal(aDivisor), ROUNDING_MODE);
+    return new Money(newAmount, currency);
   }
 
   /** Return the absolute value of the amount. */
@@ -428,7 +417,7 @@ public final class Money implements Comparable<Money>, Serializable {
    * display to an end user.
    */
   public String toString() {
-    return fAmount.toPlainString() + " " + fCurrency.getSymbol();
+    return amount.toPlainString() + " " + currency.getSymbol();
   }
 
   /**
@@ -448,13 +437,10 @@ public final class Money implements Comparable<Money>, Serializable {
   }
 
   public int hashCode() {
-    if (fHashCode == 0) {
-      fHashCode = HASH_SEED;
-      fHashCode = HASH_FACTOR * fHashCode + fAmount.hashCode();
-      fHashCode = HASH_FACTOR * fHashCode + fCurrency.hashCode();
-      fHashCode = HASH_FACTOR * fHashCode + fRounding.hashCode();
-    }
-    return fHashCode;
+    int hashCode = HASH_SEED;
+    hashCode = HASH_FACTOR * hashCode + amount.hashCode();
+    hashCode = HASH_FACTOR * hashCode + currency.hashCode();
+    return hashCode;
   }
 
   public int compareTo(Money aThat) {
@@ -464,17 +450,17 @@ public final class Money implements Comparable<Money>, Serializable {
       return EQUAL;
 
     // the object fields are never null
-    int comparison = this.fAmount.compareTo(aThat.fAmount);
+    int comparison = this.amount.compareTo(aThat.amount);
     if (comparison != EQUAL)
       return comparison;
 
-    comparison = this.fCurrency.getCurrencyCode().compareTo(
-        aThat.fCurrency.getCurrencyCode());
+    comparison = this.currency.getCurrencyCode().compareTo(
+        aThat.currency.getCurrencyCode());
     if (comparison != EQUAL)
       return comparison;
 
 
-    comparison = this.fRounding.compareTo(aThat.fRounding);
+    comparison = ROUNDING_MODE.compareTo(Money.ROUNDING_MODE);
     if (comparison != EQUAL)
       return comparison;
 
@@ -488,35 +474,20 @@ public final class Money implements Comparable<Money>, Serializable {
    * 
    * @serial
    */
-  private BigDecimal fAmount;
+  private BigDecimal amount;
 
   /**
    * The currency of the money, such as US Dollars or Euros. Never null.
    * 
    * @serial
    */
-  private final Currency fCurrency;
-
-  /**
-   * The rounding style to be used. See {@link BigDecimal}.
-   * 
-   * @serial
-   */
-  private final RoundingMode fRounding;
+  private final Currency currency;
 
   /**
    * The default currency to be used if no currency is passed to the constructor.
    */
   private static Currency DEFAULT_CURRENCY;
 
-  /**
-   * The default rounding style to be used if no currency is passed to the constructor. See
-   * {@link BigDecimal}.
-   */
-  private static RoundingMode DEFAULT_ROUNDING;
-
-  /** @serial */
-  private int fHashCode;
   private static final int HASH_SEED = 23;
   private static final int HASH_FACTOR = 37;
 
@@ -542,7 +513,7 @@ public final class Money implements Comparable<Money>, Serializable {
     aInputStream.defaultReadObject();
     // defensive copy for mutable date field
     // BigDecimal is not technically immutable, since its non-final
-    fAmount = new BigDecimal(fAmount.toPlainString());
+    amount = new BigDecimal(amount.toPlainString());
     // ensure that object state has not been corrupted or tampered with maliciously
     validateState();
   }
@@ -553,33 +524,33 @@ public final class Money implements Comparable<Money>, Serializable {
   }
 
   private void validateState() {
-    if (fAmount == null) {
+    if (amount == null) {
       throw new IllegalArgumentException("Amount cannot be null");
     }
-    if (fCurrency == null) {
+    if (currency == null) {
       throw new IllegalArgumentException("Currency cannot be null");
     }
-    if (fAmount.scale() > getNumDecimalsForCurrency()) {
+    if (amount.scale() > getNumDecimalsForCurrency()) {
       throw new IllegalArgumentException(
-          "Number of decimals is " + fAmount.scale() + ", but currency only takes " +
+          "Number of decimals is " + amount.scale() + ", but currency only takes " +
               getNumDecimalsForCurrency() + " decimals.");
     }
   }
 
   private int getNumDecimalsForCurrency() {
-    return fCurrency.getDefaultFractionDigits();
+    return currency.getDefaultFractionDigits();
   }
 
   private void checkCurrenciesMatch(Money aThat) {
-    if (!this.fCurrency.equals(aThat.getCurrency())) {
+    if (!this.currency.equals(aThat.getCurrency())) {
       throw new MismatchedCurrencyException(
-          aThat.getCurrency() + " doesn't match the expected currency : " + fCurrency);
+          aThat.getCurrency() + " doesn't match the expected currency : " + currency);
     }
   }
 
   /** Ignores scale: 0 same as 0.00 */
   private int compareAmount(Money aThat) {
-    return this.fAmount.compareTo(aThat.fAmount);
+    return this.amount.compareTo(aThat.amount);
   }
 
   private BigDecimal asBigDecimal(double aDouble) {
