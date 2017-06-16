@@ -14,6 +14,9 @@ import org.junit.Before;
 import org.junit.Test;
 import spark.Service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class RestApiTest {
 
   private static final double ONE_CENT = 0.01;
@@ -59,9 +62,18 @@ public class RestApiTest {
 
     .then()
         .statusCode(200)
+        .headers(corsHeaders())
         .body(
             "amount", closeToFloat(12.34, ONE_CENT),
             "currency", is("USD"));
+  }
+
+  private static Map<String, String> corsHeaders() {
+    HashMap<String, String> headers = new HashMap<String, String>();
+    headers.put("Access-Control-Allow-Origin", "*");
+    headers.put("Access-Control-Request-Method", "*");
+    headers.put("Access-Control-Allow-Headers", "*");
+    return headers;
   }
   
   @Test
@@ -77,6 +89,7 @@ public class RestApiTest {
       .post("/accounts")
   
   .then()
+      .headers(corsHeaders())
       .statusCode(200);
     
     assertThat(accountRepository.items).hasSize(1);
@@ -85,6 +98,5 @@ public class RestApiTest {
     
     responseValidator.body("id", is(savedAccount.getId().toString()));
   }
-
 
 }
