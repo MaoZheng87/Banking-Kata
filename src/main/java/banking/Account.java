@@ -22,4 +22,8 @@ public class Account {
     return balance;
   }
 
+  public void withdraw(Money amount) {
+    balance = balance.minus(amount);
+  }
+
 }
