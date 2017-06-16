@@ -174,9 +174,19 @@ public final class Money implements Comparable<Money>, Serializable {
     DEFAULT_CURRENCY = aDefaultCurrency;
     DEFAULT_ROUNDING = aDefaultRounding;
   }
-  
+
   static {
     init(Currency.getInstance("USD"), RoundingMode.HALF_EVEN);
+  }
+
+  /**
+   * Convenience factory method for creating a Money from a string.
+   * 
+   * @param amount string amount, will be used to create a BigDecimal
+   * @return a new Money instance
+   */
+  public static Money of(String amount) {
+    return new Money(new BigDecimal(amount));
   }
 
   /**
