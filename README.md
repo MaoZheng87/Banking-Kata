@@ -9,5 +9,9 @@ The good news is that most of the codebase is pretty readable and well-tested. T
 ## Running the API
 
 ```sh
-gradlew run
+./gradlew run
 ```
+
+## API Endpoints
+
+`/account/{accountID}/balance`: Get the current balance of the account with ID `{accountID}`. For example,  `http://localhost:8080/account/a36aca2e-417f-45ed-83f8-55d7ecc69e5e/balance`.
