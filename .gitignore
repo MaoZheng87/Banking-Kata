@@ -27,3 +27,5 @@ build/
 .classpath
 .project
 .settings/
+
+accounts.json

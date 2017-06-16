@@ -42,13 +42,29 @@ public class FileRepositoryTest {
       FakeItem[] items = new FakeItem[] { item1, item2 };
       new Gson().toJson(items, writer);
     }
-    FileRepository<FakeItem> repository = new FileRepository<FakeItem>(FakeItem.class, tempFile);
+    FileRepository<FakeItem> repository = new FileRepository<>(FakeItem.class, tempFile);
 
     Optional<FakeItem> foundItem = repository.findOne(item1.getId());
     
     assertThat(foundItem).isPresent();
     assertThat(foundItem.get().getId()).isEqualTo(item1.getId());
     
+  }
+  
+  @Test
+  public void canRoundTripItemsToAndFromTheRepository() throws Exception {
+    FakeItem item1 = new FakeItem();
+    FakeItem item2 = new FakeItem();
+    
+    FileRepository<FakeItem> repository = new FileRepository<>(FakeItem.class, tempFile);
+    
+    repository.save(item1);
+    repository.save(item2);
+    
+    Optional<FakeItem> foundItem = repository.findOne(item1.getId());
+    
+    assertThat(foundItem).isPresent();
+    assertThat(foundItem.get().getId()).isEqualTo(item1.getId());
   }
   
   // TODO: What if something goes wrong?
