@@ -12,7 +12,7 @@ public class FakeRepository<T extends Identifiable> implements Repository<T> {
   public Map<UUID, T> items = new HashMap<>();
 
   @Override
-  public Optional<T> findOne(final UUID id) {
+  public Optional<T> get(final UUID id) {
     return Optional.ofNullable(items.get(id));
   }
 

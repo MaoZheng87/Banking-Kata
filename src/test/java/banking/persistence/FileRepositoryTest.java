@@ -47,7 +47,7 @@ public class FileRepositoryTest {
 
     // Act
     FileRepository<FakeItem> copyRepository = new FileRepository<>(FakeItem.class, copyOfDataFile);
-    Optional<FakeItem> foundItem = copyRepository.findOne(id);
+    Optional<FakeItem> foundItem = copyRepository.get(id);
 
     // Assert
     assertThat(foundItem).isPresent();
@@ -64,7 +64,7 @@ public class FileRepositoryTest {
 
     // Act
     repository.save(new FakeItem(id, content));
-    Optional<FakeItem> foundItem = repository.findOne(id);
+    Optional<FakeItem> foundItem = repository.get(id);
 
     // Assert
     assertThat(foundItem).isPresent();
@@ -83,7 +83,7 @@ public class FileRepositoryTest {
     repository.save(new FakeItem());
     repository.save(new FakeItem(id, content));
     repository.save(new FakeItem());
-    Optional<FakeItem> foundItem = repository.findOne(id);
+    Optional<FakeItem> foundItem = repository.get(id);
 
     // Assert
     assertThat(foundItem).isPresent();
@@ -104,7 +104,7 @@ public class FileRepositoryTest {
     repository.save(item);
 
     // Assert
-    Optional<FakeItem> foundItem = repository.findOne(id);
+    Optional<FakeItem> foundItem = repository.get(id);
     assertThat(foundItem).isPresent();
     assertThat(foundItem.get().content).isEqualTo("xyz");
     assertThat(Files.contentOf(dataFile, "UTF-8")).doesNotContain("abc");
@@ -123,7 +123,7 @@ public class FileRepositoryTest {
     repository.save(updatedItem);
 
     // Assert
-    Optional<FakeItem> foundItem = repository.findOne(originalItem.getId());
+    Optional<FakeItem> foundItem = repository.get(originalItem.getId());
     assertThat(foundItem).isPresent();
     assertThat(foundItem.get().content).isEqualTo("xyz");
     assertThat(Files.contentOf(dataFile, "UTF-8")).doesNotContain("abc");

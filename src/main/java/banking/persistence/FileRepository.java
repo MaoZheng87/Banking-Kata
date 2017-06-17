@@ -25,7 +25,7 @@ public class FileRepository<T extends Identifiable> implements Repository<T> {
   }
 
   @Override
-  public Optional<T> findOne(UUID id) {
+  public Optional<T> get(UUID id) {
     Map<UUID, T> items = readMapFromFile();
     T value = items.get(id);
     return Optional.ofNullable(value);

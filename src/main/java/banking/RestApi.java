@@ -45,7 +45,7 @@ public class RestApi {
       UUID id = UUID.fromString(request.params("id"));
 
       return accountRepository
-          .findOne(id)
+          .get(id)
           .map(account -> account.getBalance())
           .orElse(null);
 

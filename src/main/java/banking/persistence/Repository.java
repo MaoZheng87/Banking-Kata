@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public interface Repository<T extends Identifiable> {
 
-  Optional<T> findOne(UUID id);
+  Optional<T> get(UUID id);
 
   void save(T item);
 
