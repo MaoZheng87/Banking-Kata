@@ -1,73 +1,149 @@
 package banking.persistence;
 
+import static java.nio.file.Files.copy;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.google.gson.Gson;
 import org.assertj.core.util.Files;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.nio.charset.Charset;
+import java.io.IOException;
+import java.nio.file.StandardCopyOption;
 import java.util.Optional;
+import java.util.UUID;
 
 public class FileRepositoryTest {
-  
-  private File tempFile;
+
+  private File dataFile;
 
   @Before
-  public void makeTempFile() throws Exception {
-    tempFile = File.createTempFile("banking", "test.json");
-    tempFile.deleteOnExit();
+  public void makeDataFile() throws Exception {
+    dataFile = makeTempFile("fileRepository");
   }
-  
+
   @Test
   public void savesNewItemsToAFile() throws Exception {
-    FileRepository<FakeItem> repository = new FileRepository<FakeItem>(FakeItem.class, tempFile);
-    
-    FakeItem item = new FakeItem();
-    repository.save(item);
-    
-    String fileContents = Files.contentOf(tempFile, Charset.defaultCharset());
-    assertThat(fileContents).containsSequence(item.getId().toString());
-  }
-  
-  @Test
-  public void findsAnItemFromFileInJSONFormat() throws Exception {
-    FakeItem item1 = new FakeItem();
-    FakeItem item2 = new FakeItem();
-    
-    try (FileWriter writer = new FileWriter(tempFile)) {
-      FakeItem[] items = new FakeItem[] { item1, item2 };
-      new Gson().toJson(items, writer);
-    }
-    FileRepository<FakeItem> repository = new FileRepository<>(FakeItem.class, tempFile);
+    FileRepository<FakeItem> repository = new FileRepository<FakeItem>(FakeItem.class, dataFile);
 
-    Optional<FakeItem> foundItem = repository.findOne(item1.getId());
-    
-    assertThat(foundItem).isPresent();
-    assertThat(foundItem.get().getId()).isEqualTo(item1.getId());
-    
+    String uuid = "f3343523-b9b2-4524-a081-f7b06e9e5aae";
+    String content = "hello";
+
+    repository.save(new FakeItem(UUID.fromString(uuid), content));
+
+    String fileContents = Files.contentOf(dataFile, "UTF-8");
+    assertThat(fileContents).containsSequence(uuid);
+    assertThat(fileContents).containsSequence(content);
   }
-  
+
+  @Test
+  public void canReadItemsFromPreExistingFile() throws Exception {
+    // Arrange
+    UUID id = UUID.randomUUID();
+    String content = "abc";
+
+    new FileRepository<>(FakeItem.class, dataFile).save(new FakeItem(id, content));
+    File copyOfDataFile = makeCopyOf(dataFile);
+
+    // Act
+    FileRepository<FakeItem> copyRepository = new FileRepository<>(FakeItem.class, copyOfDataFile);
+    Optional<FakeItem> foundItem = copyRepository.findOne(id);
+
+    // Assert
+    assertThat(foundItem).isPresent();
+    assertThat(foundItem.get().getId()).isEqualTo(id);
+    assertThat(foundItem.get().content).isEqualTo(content);
+  }
+
   @Test
   public void canRoundTripItemsToAndFromTheRepository() throws Exception {
-    FakeItem item1 = new FakeItem();
-    FakeItem item2 = new FakeItem();
-    
-    FileRepository<FakeItem> repository = new FileRepository<>(FakeItem.class, tempFile);
-    
-    repository.save(item1);
-    repository.save(item2);
-    
-    Optional<FakeItem> foundItem = repository.findOne(item1.getId());
-    
+    // Arrange
+    UUID id = UUID.randomUUID();
+    String content = "Happy Fun Times";
+    FileRepository<FakeItem> repository = new FileRepository<>(FakeItem.class, dataFile);
+
+    // Act
+    repository.save(new FakeItem(id, content));
+    Optional<FakeItem> foundItem = repository.findOne(id);
+
+    // Assert
     assertThat(foundItem).isPresent();
-    assertThat(foundItem.get().getId()).isEqualTo(item1.getId());
+    assertThat(foundItem.get().getId()).isEqualTo(id);
+    assertThat(foundItem.get().content).isEqualTo(content);
   }
-  
-  // TODO: What if something goes wrong?
+
+  @Test
+  public void canSaveMoreThanOneItemToTheRepository() throws Exception {
+    // Arrange
+    UUID id = UUID.randomUUID();
+    String content = "Second item";
+    FileRepository<FakeItem> repository = new FileRepository<>(FakeItem.class, dataFile);
+
+    // Act
+    repository.save(new FakeItem());
+    repository.save(new FakeItem(id, content));
+    repository.save(new FakeItem());
+    Optional<FakeItem> foundItem = repository.findOne(id);
+
+    // Assert
+    assertThat(foundItem).isPresent();
+    assertThat(foundItem.get().getId()).isEqualTo(id);
+    assertThat(foundItem.get().content).isEqualTo(content);
+  }
+
+  @Test
+  public void mutatingAndResavingItemsUpdatesTheirContentsOnDisk() throws Exception {
+    // Arrange
+    UUID id = UUID.randomUUID();
+    FakeItem item = new FakeItem(id, "abc");
+    FileRepository<FakeItem> repository = new FileRepository<>(FakeItem.class, dataFile);
+    repository.save(item);
+
+    // Act
+    item.content = "xyz";
+    repository.save(item);
+
+    // Assert
+    Optional<FakeItem> foundItem = repository.findOne(id);
+    assertThat(foundItem).isPresent();
+    assertThat(foundItem.get().content).isEqualTo("xyz");
+    assertThat(Files.contentOf(dataFile, "UTF-8")).doesNotContain("abc");
+  }
+
+  @Test
+  public void savingNewCopiesOfExistingItemsUpdatesTheirContentsOnDisk() throws Exception {
+    // Arrange
+    UUID id = UUID.randomUUID();
+    FakeItem originalItem = new FakeItem(id, "abc");
+    FakeItem updatedItem = new FakeItem(id, "xyz");
+    FileRepository<FakeItem> repository = new FileRepository<>(FakeItem.class, dataFile);
+    repository.save(originalItem);
+
+    // Act
+    repository.save(updatedItem);
+
+    // Assert
+    Optional<FakeItem> foundItem = repository.findOne(originalItem.getId());
+    assertThat(foundItem).isPresent();
+    assertThat(foundItem.get().content).isEqualTo("xyz");
+    assertThat(Files.contentOf(dataFile, "UTF-8")).doesNotContain("abc");
+  }
+
+  private static File makeTempFile(String prefix) throws IOException {
+    File file = File.createTempFile(prefix, "test");
+    file.deleteOnExit();
+    return file;
+  }
+
+  private static File makeCopyOf(File sourceFile) throws IOException {
+    File copyOfData = makeTempFile("copyOfFileRepository");
+    copy(sourceFile.toPath(), copyOfData.toPath(), StandardCopyOption.REPLACE_EXISTING);
+    return copyOfData;
+  }
+
+  // TODO: What if the file doesn't already exist?
+  // TODO: What if something goes wrong writing or reading from the file (IOException)?
   // TODO: What about reading all items?
+  // TODO: What about using a different file format?
 
 }

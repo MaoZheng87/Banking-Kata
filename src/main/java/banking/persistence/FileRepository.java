@@ -2,21 +2,17 @@ package banking.persistence;
 
 import banking.model.Identifiable;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public class FileRepository<T extends Identifiable> implements Repository<T> {
 
@@ -30,14 +26,15 @@ public class FileRepository<T extends Identifiable> implements Repository<T> {
 
   @Override
   public Optional<T> findOne(UUID id) {
-    return streamAll().filter(item -> id.equals(item.getId())).findFirst();
+    Map<UUID, T> items = readMapFromFile();
+    T value = items.get(id);
+    return Optional.ofNullable(value);
   }
 
-  public Stream<T> streamAll() {
+  public Map<UUID, T> readMapFromFile() {
     try (FileReader reader = new FileReader(file)) {
 
-      Stream<T> items = readItems(reader);
-      return items;
+      return readAllItems(reader);
 
     } catch (FileNotFoundException e) {
       // TODO need to do something smarter here than bailing
@@ -46,36 +43,32 @@ public class FileRepository<T extends Identifiable> implements Repository<T> {
       // TODO need to do something smarter here than bailing
       e.printStackTrace();
     }
-    return null;
+    throw new RuntimeException();
   }
 
-  private Stream<T> readItems(FileReader reader) {
+  private Map<UUID, T> readAllItems(FileReader reader) {
     Gson gson = new Gson();
-    JsonElement rootElement = new JsonParser().parse(reader);
-
-    if (!rootElement.isJsonArray()) {
-      return Stream.empty();
-    }
-
-    JsonArray jsonArray = rootElement.getAsJsonArray();
-    Stream<T> items = StreamSupport.stream(jsonArray.spliterator(), false)
-        .map(obj -> gson.fromJson(obj, type));
-    return items;
+    TypeToken<?> typeToken = TypeToken.getParameterized(HashMap.class, UUID.class, this.type);
+    Map<UUID, T> items = gson.fromJson(reader, typeToken.getType());
+    return items == null ? new HashMap<UUID, T>() : items;
   }
 
   @Override
   public void save(T item) {
-    List<T> existingItems = streamAll().collect(Collectors.toList());
-    existingItems.add(item);
+    Map<UUID, T> allItems = readMapFromFile();
+    allItems.put(item.getId(), item);
 
     try (FileWriter fileWriter = new FileWriter(file)) {
 
-      new Gson().toJson(existingItems, fileWriter);
+      new Gson().toJson(allItems, fileWriter);
+
     } catch (IOException e) {
       // TODO need to do something smarter here than bailing
       e.printStackTrace();
     }
 
   }
+
+  // TODO: what refactoring could be done here?
 
 }
