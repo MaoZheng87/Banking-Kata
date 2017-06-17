@@ -36,7 +36,7 @@ public class RestApiTest {
     account = new Account(Money.of(ACCOUNT_BALANCE));
 
     accountRepository = new FakeRepository<>();
-    accountRepository.items.add(account);
+    accountRepository.save(account);
   }
 
   public void startServer() {
@@ -93,7 +93,7 @@ public class RestApiTest {
       .statusCode(200);
     
     assertThat(accountRepository.items).hasSize(1);
-    Account savedAccount = accountRepository.items.get(0);
+    Account savedAccount = accountRepository.items.values().iterator().next();
     assertThat(savedAccount.getBalance()).isEqualTo(startingBalance);
     
     responseValidator.body("id", is(savedAccount.getId().toString()));
