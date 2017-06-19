@@ -27,7 +27,7 @@ The good news is that most of the codebase is pretty readable and well-tested. T
 - Check deposit
 - ACH clearing
 - Bill pay
-- Text nofications
+- Text notifications
 - Travel notice
 - Fraud detection
 - Transaction location/mapping
