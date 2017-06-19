@@ -14,7 +14,31 @@ The good news is that most of the codebase is pretty readable and well-tested. T
 
 ## API Endpoints
 
-`/account/{accountID}/balance`: Get the current balance of the account with ID `{accountID}`. For example,  `http://localhost:8080/account/a36aca2e-417f-45ed-83f8-55d7ecc69e5e/balance`.
+`POST /accounts`: Create a new account with a starting balance. Returns the new account ID and other info in JSON format. For example:
+
+```
+POST /accounts HTTP/1.1
+Content-Type: application/json
+
+{
+    "amount": 67.21,
+    "currency": "USD"
+}
+```
+
+```
+HTTP/1.1 200 OK
+
+{
+    "id": "a36aca2e-417f-45ed-83f8-55d7ecc69e5e",
+    "balance": {
+        "amount": 67.21,
+        "currency": "USD"
+    }
+}
+```
+
+`GET /accounts/{accountID}/balance`: Get the current balance of the account with ID `{accountID}`. For example,  `http://localhost:8080/accounts/a36aca2e-417f-45ed-83f8-55d7ecc69e5e/balance`.
 
 ## Feature Ideas
 
