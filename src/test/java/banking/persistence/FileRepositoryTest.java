@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.StandardCopyOption;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -140,6 +141,36 @@ public class FileRepositoryTest {
 
     // Assert
     assertThat(dataFile).exists();
+  }
+
+  @Test
+  public void getAllItemsIsEmptyWhenFileIsEmpty() throws Exception {
+    // Arrange
+    FileRepository<FakeItem> repository = new FileRepository<FakeItem>(FakeItem.class, dataFile);
+
+    // Act
+    Collection<FakeItem> items = repository.getAll();
+
+    // Assert
+    assertThat(items).isEmpty();
+  }
+
+  @Test
+  public void gettingAllItemsMeansEverythingThatWasPreviouslySaved() throws Exception {
+    // Arrange
+    FileRepository<FakeItem> repository = new FileRepository<FakeItem>(FakeItem.class, dataFile);
+    FakeItem item1 = new FakeItem();
+    FakeItem item2 = new FakeItem();
+    FakeItem item3 = new FakeItem();
+    repository.save(item1);
+    repository.save(item2);
+    repository.save(item3);
+
+    // Act
+    Collection<FakeItem> items = repository.getAll();
+
+    // Assert
+    assertThat(items).containsOnly(item1, item2, item3);
   }
 
   private static File makeTempFile(String prefix) throws IOException {

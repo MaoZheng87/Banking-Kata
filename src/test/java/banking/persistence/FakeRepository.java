@@ -2,6 +2,7 @@ package banking.persistence;
 
 import banking.model.Identifiable;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -19,6 +20,11 @@ public class FakeRepository<T extends Identifiable> implements Repository<T> {
   @Override
   public void save(T item) {
     items.put(item.getId(), item);
+  }
+
+  @Override
+  public Collection<T> getAll() {
+    return items.values();
   }
 
 }
