@@ -14,7 +14,9 @@ The good news is that most of the codebase is pretty readable and well-tested. T
 
 ## API Endpoints
 
-`POST /accounts`: Create a new account with a starting balance. Returns the new account ID and other info in JSON format. For example:
+### `POST /accounts` 
+
+Create a new account with a starting balance. Returns the new account ID and other info in JSON format. For example:
 
 ```
 POST /accounts HTTP/1.1
@@ -38,7 +40,9 @@ HTTP/1.1 200 OK
 }
 ```
 
-`GET /accounts`: Get a list of all accounts in the system. Example:
+### `GET /accounts`
+
+Get a list of all accounts in the system. Example:
 
 ```
 GET /accounts HTTP/1.1
@@ -65,7 +69,22 @@ HTTP/1.1 200 OK
 ]
 ```
 
-`GET /accounts/{accountID}/balance`: Get the current balance of the account with ID `{accountID}`. For example,  `http://localhost:8080/accounts/a36aca2e-417f-45ed-83f8-55d7ecc69e5e/balance`.
+### `GET /accounts/{accountID}/balance`
+
+Get the current balance of the account with ID `{accountID}`. For example:
+
+```
+GET /accounts/4a404edd-b32f-438b-b873-ba3c8dfcdb75/balance HTTP/1.1
+```
+
+```
+HTTP/1.1 200 OK
+
+{
+    "amount": 65,
+    "currency": "USD"
+}
+```
 
 ## Feature Ideas
 
