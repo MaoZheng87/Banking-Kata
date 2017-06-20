@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import spark.Service;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.UUID;
 
 public class RestApi {
@@ -32,6 +33,11 @@ public class RestApi {
       response.header("Access-Control-Request-Method", "*");
       response.header("Access-Control-Allow-Headers", "*");
     });
+
+    spark.get("/accounts", (request, response) -> {
+      Collection<Account> accounts = accountRepository.getAll();
+      return accounts;
+    }, new Gson()::toJson);
 
     spark.post("/accounts", (request, response) -> {
       Money startingBalance = new Gson().fromJson(request.body(), Money.class);

@@ -3,14 +3,14 @@ package banking.persistence;
 import banking.model.Identifiable;
 
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 public class FakeRepository<T extends Identifiable> implements Repository<T> {
 
-  public Map<UUID, T> items = new HashMap<>();
+  public Map<UUID, T> items = new LinkedHashMap<>();
 
   @Override
   public Optional<T> get(final UUID id) {

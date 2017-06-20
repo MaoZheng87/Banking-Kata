@@ -38,6 +38,33 @@ HTTP/1.1 200 OK
 }
 ```
 
+`GET /accounts`: Get a list of all accounts in the system. Example:
+
+```
+GET /accounts HTTP/1.1
+```
+
+```
+HTTP/1.1 200 OK
+
+[
+    {
+        "id": "fc8a579d-6673-4edb-9a87-6d85093ecd74",
+        "balance": {
+            "amount": 45,
+            "currency": "USD"
+        }
+    },
+    {
+        "id": "4a404edd-b32f-438b-b873-ba3c8dfcdb75",
+        "balance": {
+            "amount": 65,
+            "currency": "USD"
+        }
+    }
+]
+```
+
 `GET /accounts/{accountID}/balance`: Get the current balance of the account with ID `{accountID}`. For example,  `http://localhost:8080/accounts/a36aca2e-417f-45ed-83f8-55d7ecc69e5e/balance`.
 
 ## Feature Ideas

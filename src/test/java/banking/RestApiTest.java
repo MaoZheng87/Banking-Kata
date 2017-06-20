@@ -99,4 +99,26 @@ public class RestApiTest {
     responseValidator.body("id", is(savedAccount.getId().toString()));
   }
 
+  @Test
+  public void canGetListOfAllAccounts() throws Exception {
+    Account secondAccount = new Account(Money.of("0.00"));
+    accountRepository.save(secondAccount);
+
+    given()
+        .accept(ContentType.JSON)
+
+        .when()
+        .get("/accounts")
+
+        .then()
+        .statusCode(200)
+        .headers(corsHeaders())
+        .body(
+            "get(0).id", is(account.getId().toString()),
+            "get(0).balance.amount", closeToFloat(12.34, ONE_CENT),
+
+            "get(1).id", is(secondAccount.getId().toString()),
+            "get(1).balance.amount", closeToFloat(0.00, ONE_CENT));
+  }
+
 }
