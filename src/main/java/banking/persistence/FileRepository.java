@@ -37,8 +37,9 @@ public class FileRepository<T extends Identifiable> implements Repository<T> {
       return readAllItems(reader);
 
     } catch (FileNotFoundException e) {
-      // TODO need to do something smarter here than bailing
-      e.printStackTrace();
+
+      return new HashMap<>();
+
     } catch (IOException e) {
       // TODO need to do something smarter here than bailing
       e.printStackTrace();

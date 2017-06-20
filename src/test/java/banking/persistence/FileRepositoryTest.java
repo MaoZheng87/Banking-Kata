@@ -129,6 +129,19 @@ public class FileRepositoryTest {
     assertThat(Files.contentOf(dataFile, "UTF-8")).doesNotContain("abc");
   }
 
+  @Test
+  public void savingShouldCreateTheDataFileIfItDoesntExist() throws Exception {
+    // Arrange
+    FileRepository<FakeItem> repository = new FileRepository<FakeItem>(FakeItem.class, dataFile);
+    dataFile.delete();
+
+    // Act
+    repository.save(new FakeItem());
+
+    // Assert
+    assertThat(dataFile).exists();
+  }
+
   private static File makeTempFile(String prefix) throws IOException {
     File file = File.createTempFile(prefix, "test");
     file.deleteOnExit();
@@ -141,7 +154,6 @@ public class FileRepositoryTest {
     return copyOfData;
   }
 
-  // TODO: What if the file doesn't already exist?
   // TODO: What if something goes wrong writing or reading from the file (IOException)?
   // TODO: What about reading all items?
   // TODO: What about using a different file format?
