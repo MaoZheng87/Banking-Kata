@@ -10,6 +10,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -74,7 +75,7 @@ public class FileRepository<T extends Identifiable> implements Repository<T> {
   @Override
   public Collection<T> getAll() {
     Map<UUID, T> items = readMapFromFile();
-    return items.values();
+    return Collections.unmodifiableCollection(items.values());
   }
 
   // TODO: what refactoring could be done here?

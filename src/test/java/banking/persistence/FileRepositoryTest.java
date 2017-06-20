@@ -173,6 +173,29 @@ public class FileRepositoryTest {
     assertThat(items).containsOnly(item1, item2, item3);
   }
 
+  @Test(expected = Exception.class)
+  public void cannotAddToItemsCollectionDirectly() throws Exception {
+    // Arrange
+    FileRepository<FakeItem> repository = new FileRepository<FakeItem>(FakeItem.class, dataFile);
+    Collection<FakeItem> items = repository.getAll();
+
+    // Act
+    items.add(new FakeItem());
+  }
+
+  @Test(expected = Exception.class)
+  public void cannotRemoveItemsFromCollectionDirectly() throws Exception {
+    // Arrange
+    FileRepository<FakeItem> repository = new FileRepository<FakeItem>(FakeItem.class, dataFile);
+    FakeItem item = new FakeItem();
+    repository.save(item);
+
+    Collection<FakeItem> items = repository.getAll();
+
+    // Act
+    items.remove(item);
+  }
+
   private static File makeTempFile(String prefix) throws IOException {
     File file = File.createTempFile(prefix, "test");
     file.deleteOnExit();
