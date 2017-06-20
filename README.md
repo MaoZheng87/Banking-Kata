@@ -6,6 +6,12 @@ On your first day, the founders gave you a huge list of features they'd love to 
 
 The good news is that most of the codebase is pretty readable and well-tested. There are a couple areas, though, where you can tell they cut corners to get a feature out the door.
 
+## Compile and Run Tests
+
+```sh
+./gradlew build
+```
+
 ## Running the API
 
 ```sh
