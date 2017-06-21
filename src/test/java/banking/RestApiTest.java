@@ -68,6 +68,29 @@ public class RestApiTest {
             "currency", is("USD"));
   }
 
+  @Test
+  public void shouldDepositTheCorrectAmount() throws Exception {
+
+    Money depositAmount = Money.of("120.02");
+    accountRepository.savedItems.clear();
+
+    given()
+            .accept(ContentType.JSON)
+            .pathParam("accountId", account.getId().toString())
+            .body(new Gson().toJson(depositAmount))
+            .when()
+            .post("/accounts/{accountId}/deposit")
+
+            .then()
+            .statusCode(200)
+            .headers(corsHeaders())
+            .body(
+                    "amount", closeToFloat(132.36, ONE_CENT),
+                    "currency", is("USD"));
+    assertThat(accountRepository.savedItems).contains(account);
+    assertThat(account.getBalance()).isEqualTo(Money.of("132.36"));
+  }
+
   private static Map<String, String> corsHeaders() {
     HashMap<String, String> headers = new HashMap<String, String>();
     headers.put("Access-Control-Allow-Origin", "*");
