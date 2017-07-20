@@ -29,4 +29,10 @@ it(`should have as dateTime '8/10 - 8/20 9 AM - Midnight'`, async(() => {
     expect(eventsComponent.location).toEqual('Iowa State Fairgrounds');
   }));
 
+  it('should display a title', async(()=>{
+    const fixture = TestBed.createComponent(EventsComponent);
+    const eventsComponent = fixture.debugElement.nativeElement;
+    expect(eventsComponent.querySelector('div > div > h1')).toBeTruthy();
+  }));
+
 });
