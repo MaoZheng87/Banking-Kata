@@ -4,11 +4,13 @@ import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { ApiService } from './api.service';
 import {HomeComponent} from "./features/home/home.component";
+import {AccountBalanceComponent} from "./features/account-balance/account-balance.component";
 
 @NgModule({
   declarations: [
     AppComponent,
-    HomeComponent
+    HomeComponent,
+    AccountBalanceComponent
   ],
   imports: [
     BrowserModule
