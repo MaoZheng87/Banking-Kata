@@ -6,6 +6,8 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./account-balance.component.css']
 })
 export class AccountBalanceComponent implements OnInit {
+  savingsBalance: number;
+  checkingBalance: number;
 
   constructor() { }
 
