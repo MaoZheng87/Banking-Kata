@@ -28,8 +28,15 @@ task installAngularCli(type: Exec) {
 }
 
 task frontendTest(type: Exec) {
+    dependsOn installNodeModules
     workingDir 'banking-frontend'
     commandLine "ng", "test", "--single-run"
+}
+
+task frontendServe(type: Exec) {
+    dependsOn installNodeModules
+    workingDir 'banking-frontend'
+    commandLine "ng", "serve"
 }
 
 task allTests {
