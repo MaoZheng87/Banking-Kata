@@ -8,8 +8,22 @@ The good news is that most of the codebase is pretty readable and well-tested. T
 
 ## Compile and Run Tests
 
+For the backend:
+
 ```sh
 ./gradlew build
+```
+
+For the frontend:
+
+```sh
+./gradlew frontendTest
+```
+
+For both:
+
+```sh
+./gradlew allTests
 ```
 
 ## Running the API
