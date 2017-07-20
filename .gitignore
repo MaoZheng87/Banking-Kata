@@ -29,3 +29,6 @@ build/
 .settings/
 
 accounts.json
+
+node_modules
+

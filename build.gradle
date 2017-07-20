@@ -8,10 +8,30 @@ repositories {
 mainClassName = "banking.RestApi"
 
 dependencies {
-	compile 'com.google.code.gson:gson:2.8.1'
+    compile 'com.google.code.gson:gson:2.8.1'
     compile 'org.slf4j:slf4j-simple:1.7.25'
-	compile 'com.sparkjava:spark-core:2.6.0'
+    compile 'com.sparkjava:spark-core:2.6.0'
     testCompile 'io.rest-assured:rest-assured:3.0.3'
     testCompile 'junit:junit:4.12'
     testCompile 'org.assertj:assertj-core:3.8.0'
+}
+
+task installNodeModules(type: Exec) {
+    workingDir 'banking-frontend'
+    inputs.file file('banking-frontend/package.json')
+    outputs.dir file('banking-frontend/node_modules')
+    commandLine "npm", "install"
+}
+
+task installAngularCli(type: Exec) {
+    commandLine "npm", "-g", "install", "@angular/cli"
+}
+
+task frontendTest(type: Exec) {
+    workingDir 'banking-frontend'
+    commandLine "ng", "test", "--single-run"
+}
+
+task allTests {
+    dependsOn test, frontendTest
 }
