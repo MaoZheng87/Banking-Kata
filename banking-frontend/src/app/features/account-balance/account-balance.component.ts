@@ -12,6 +12,8 @@ export class AccountBalanceComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
+    this.savingsBalance = 5000;
+    this.checkingBalance = 2000;
   }
 
 }
