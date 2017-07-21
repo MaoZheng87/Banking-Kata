@@ -7,6 +7,7 @@ import { EventsComponent } from './features/events/events.component';
 import { ApiService } from './api.service';
 import {HomeComponent} from "./features/home/home.component";
 import {AccountBalanceComponent} from "./features/account-balance/account-balance.component";
+import {AlertModule} from "ngx-bootstrap";
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import {AccountBalanceComponent} from "./features/account-balance/account-balanc
     AccountBalanceComponent
   ],
   imports: [
-    BrowserModule
+    BrowserModule,
+    AlertModule.forRoot()
   ],
   providers: [ApiService],
   bootstrap: [AppComponent]
