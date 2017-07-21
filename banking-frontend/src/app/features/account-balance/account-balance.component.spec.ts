@@ -27,14 +27,14 @@ describe('AccountBalanceComponent', () => {
     fixture.componentInstance.savingsBalance = 5;
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('[name=savingsBalance]').textContent.trim()).toEqual('5');
+    expect(fixture.nativeElement.querySelector('[name=savingsBalance]').textContent.trim()).toEqual('$5.00');
   });
 
   it('should have checking balance', () => {
     fixture.componentInstance.checkingBalance = 3;
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('[name=checkingBalance]').textContent.trim()).toEqual('3');
+    expect(fixture.nativeElement.querySelector('[name=checkingBalance]').textContent.trim()).toEqual('$3.00');
   });
 
   it('should have savings balance label', () => {

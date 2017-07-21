@@ -1,9 +1,9 @@
 <div>
   <span name="savingsBalanceLabel">Savings: </span>
-  <span name="savingsBalance"> {{savingsBalance}} </span>
+  <span name="savingsBalance"> {{ savingsBalance | currency:'USD':true }} </span>
 </div>
 
 <div>
   <span name="checkingBalanceLabel">Checking: </span>
-  <span name="checkingBalance"> {{checkingBalance}} </span>
+  <span name="checkingBalance"> {{ checkingBalance | currency:'USD':true }}  </span>
 </div>
